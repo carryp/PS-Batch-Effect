@@ -1,26 +1,22 @@
 --- 
 title: "Optimizing Sample Allocation: Introducing the SR.Allocation, R.Allocation, and Almost.Optimal Sample Selection Functions"
 author: "Patrick M. Carry, Tim Vigers, Lauren A. Vanderlinden, Carson Keeter, Fran Dong, Teresa Buckner, Elizabeth Litkowski, Ivana Yang, Jill M. Norris, Katerina Kechris"
-date: "Report generated: `r paste(format(Sys.Date(), '%B %d, %Y'))`"
 output: 
-  html_document:
+  github_document:
     toc: true
-    toc_float: true
     toc_depth: 5
+always_allow_html: true
 ---
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
-
 # Functions
 source("./R/Almost.Optimal.R")
 source("./R/R.Allocation.R")
 source("./R/SR.Allocation.R")
-
-#Original phenotype file
-Pheno = readRDS(file="./Data/Pheno.GSE122288.Clean.Rds")
-
+# Original phenotype file
+Pheno <- readRDS(file = "./Data/Pheno.GSE122288.Clean.Rds")
 ```
 
 ## 1. Overview
@@ -64,13 +60,11 @@ knitr::include_graphics("./Figures/Three Batch Design.png")
 If using stratified randomization, order the phenotype file by the strata variable. The current iteration of this function supports stratified randomization with a single dichotomous variable (for example case vs control). In this example, we are using the ‘neonate.gender’ variable as the strata variable. To make things easier, we create a new variable ‘strata’ based on the ‘neonate.gender’ variable and then sort the dataset. **The phenotype file must be sorted by the strata variable for the SR.Allocation function to work correctly. Sorting is not required for the R.Allocation function, see below.**
 
 ```{r 4, echo=TRUE}
-#Create new variable for stratified randomization below
-Pheno$Strata = ifelse(Pheno$neonate.gender=="male",1,0)
-
-#For stratified randomization, order must be based on a dichotomous variable
-Pheno.Sort = Pheno[order(Pheno$Strata ), ]
-
-#Confirm ordering
+# Create new variable for stratified randomization below
+Pheno$Strata <- ifelse(Pheno$neonate.gender == "male", 1, 0)
+# For stratified randomization, order must be based on a dichotomous variable
+Pheno.Sort <- Pheno[order(Pheno$Strata), ]
+# Confirm ordering
 head(Pheno.Sort)
 ```
 
@@ -91,13 +85,14 @@ In our example, we have 61 samples that must be assigned to 3 batches within 2 s
 Note that the current version of this function supports up to 4 batches. The function can readily be adapted to support more complex situations. Also, if the investigator prefers randomization only, similar code can be implemented using the *R.Allocation* function, see below. 
 
 ```{r 5.ii.a, echo = TRUE}
-Rand.Space.Output.SR = SR.Allocation(Pheno.Data = Pheno.Sort,
-                                     N.Iter=10000,
-                                     Initial.Seed=08030104, 
-                                     S1.B1=9,  S1.B2=9,  S1.B3=9,  S1.B4=0, 
-                                     S2.B1=11, S2.B2=11, S2.B3=12, S2.B4=0)
-
-#NOTE: the function creates a new random seed for each iteration. This seed is stored in the Rand.Space.SR.Output. Set an initial seed so that all subsequent randomization iterations are reproducible.
+Rand.Space.Output.SR <- SR.Allocation(
+  Pheno.Data = Pheno.Sort,
+  N.Iter = 10000,
+  Initial.Seed = 08030104,
+  S1.B1 = 9, S1.B2 = 9, S1.B3 = 9, S1.B4 = 0,
+  S2.B1 = 11, S2.B2 = 11, S2.B3 = 12, S2.B4 = 0
+)
+# NOTE: the function creates a new random seed for each iteration. This seed is stored in the Rand.Space.SR.Output. Set an initial seed so that all subsequent randomization iterations are reproducible.
 ```
 
 This function will produce a dataset in which each row is a randomization iteration. The first column in the dataset ("X1") is the seed used to generate the batch assignments, column 2 to number of subjects included in the phenotype file (in this example from "X2" to "X62"). 
@@ -113,13 +108,14 @@ knitr::include_graphics("./Figures/Two Batch Design.png")
 ```
 
 ```{r 5.iv, echo = TRUE}
-#Suggested batch design coding for two batch example using phenotype file described above
-Rand.Space.Output.SR_2_Batch = SR.Allocation(Pheno.Data = Pheno.Sort,
-                                             N.Iter=10000,
-                                             Initial.Seed=12370131, 
-                                             S1.B1=13, S1.B2=14, S1.B3=0, S1.B4=0, 
-                                             S2.B1=17, S2.B2=17, S2.B3=0, S2.B4=0)
-
+# Suggested batch design coding for two batch example using phenotype file described above
+Rand.Space.Output.SR_2_Batch <- SR.Allocation(
+  Pheno.Data = Pheno.Sort,
+  N.Iter = 10000,
+  Initial.Seed = 12370131,
+  S1.B1 = 13, S1.B2 = 14, S1.B3 = 0, S1.B4 = 0,
+  S2.B1 = 17, S2.B2 = 17, S2.B3 = 0, S2.B4 = 0
+)
 ```
 
 
@@ -128,12 +124,14 @@ knitr::include_graphics("./Figures/Four Batch Design.png")
 ```
 
 ```{r 5.vi, echo = TRUE}
-#Suggested batch design coding for four batch example using phenotype file described above
-Rand.Space.Output.SR_4_Batch = SR.Allocation(Pheno.Data = Pheno.Sort,
-                                             N.Iter=10000,
-                                             Initial.Seed=73103202,
-                                             S1.B1=7, S1.B2=7, S1.B3=7, S1.B4=6, 
-                                             S2.B1=8, S2.B2=8, S2.B3=9, S2.B4=9)
+# Suggested batch design coding for four batch example using phenotype file described above
+Rand.Space.Output.SR_4_Batch <- SR.Allocation(
+  Pheno.Data = Pheno.Sort,
+  N.Iter = 10000,
+  Initial.Seed = 73103202,
+  S1.B1 = 7, S1.B2 = 7, S1.B3 = 7, S1.B4 = 6,
+  S2.B1 = 8, S2.B2 = 8, S2.B3 = 9, S2.B4 = 9
+)
 ```
 
 
@@ -147,9 +145,11 @@ Next, we will implement the *Almost.Optimal* function to iteratively evaluate ea
 
 
 ```{r 6, echo = TRUE,results = 'hide'}
-Pheno.Final.Out.SR = Almost.Optimal(Covariates = c("birth.weight","Strata","gestational.age"),
-                                    Pheno.Dataset = Pheno.Sort,
-                                    Randomization.Dataset = Rand.Space.Output.SR)
+Pheno.Final.Out.SR <- Almost.Optimal(
+  Covariates = c("birth.weight", "Strata", "gestational.age"),
+  Pheno.Dataset = Pheno.Sort,
+  Randomization.Dataset = Rand.Space.Output.SR
+)
 ```
 
 The function automatically outputs batch allocations selected based on this balancing metric and adds the allocations to an updated version of the phenotype file named “Pheno.Final.Out”. The “Batch.Assignment.Av” variable represents the ‘almost optimal’ batch allocation selected based on the minimum average difference in propensity scores between batches. The “Av.Rand.N” variable identifies the randomization iteration (row) from the Randomization dataset that was used to create the “Batch.Assignment.Av”. This is useful for identifying the random seed that was used to create this randomization iteration. Finally, the “Batch.Assignment.Imbalance.Av” selects the ‘less than optimal’ allocation (most imbalanced based on maximum difference in propensity scores) as a way to confirm that the Batch.Assignment.Av allocation resulted in improved performance. The “Imbalance.Av.N” identifies the randomization iteration (row) from the Randomization dataset used to create the “Batch.Assignment.Imbalance.Av” iteration. The function includes a timer to track progress.
@@ -160,16 +160,16 @@ After running all of the steps above, the function will return the final phenoty
 
 ```{r 7.a, echo=TRUE,message=FALSE}
 library(table1)
-#Almost Optimal Allocation
-table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Av, data=Pheno.Final.Out.SR)
+# Almost Optimal Allocation
+table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Av, data = Pheno.Final.Out.SR)
 ```
 
 
 Most importantly, comparison with the “Imbalance.N” allocation, we can confirm that batch allocation algorithm is working correctly.
 
 ```{r 7.b, echo=TRUE}
-#Less than Optimal Allocation
-table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Imbalance.Av, data=Pheno.Final.Out.SR)
+# Less than Optimal Allocation
+table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Imbalance.Av, data = Pheno.Final.Out.SR)
 ```
 
 Here we see that the 'Almost Optimal Allocation' achieves superior balance in gestational.age and gestational.age across the batches. Consistent with the stratified randomization design, the "neonate.gender" is balanced in both scenarios.
@@ -179,30 +179,34 @@ Here we see that the 'Almost Optimal Allocation' achieves superior balance in ge
 We also illustrate a similar workflow in which investigator wants to implement a simple randomization scheme. Here, we create a new randomization space using the R.Allocation function which only requires batch sample size rather than batch sample size by strata. 
 
 ```{r 8.a, echo = TRUE,results = 'hide'}
-#Implementing the simple randomization function
-Rand.Space.Output.R = R.Allocation(Pheno.Data = Pheno.Sort,
-                                   N.Iter=10000,
-                                   Initial.Seed=20230401, 
-                                   B1=20, B2=20, B3=21, B4=0)
+# Implementing the simple randomization function
+Rand.Space.Output.R <- R.Allocation(
+  Pheno.Data = Pheno.Sort,
+  N.Iter = 10000,
+  Initial.Seed = 20230401,
+  B1 = 20, B2 = 20, B3 = 21, B4 = 0
+)
 
-#Evaluating the simple randomization version of the function
-Pheno.Final.Out.R = Almost.Optimal(Covariates = c("birth.weight","Strata","gestational.age"), 
-                                   Pheno.Dataset = Pheno.Sort,
-                                   Randomization.Dataset = Rand.Space.Output.R)
+# Evaluating the simple randomization version of the function
+Pheno.Final.Out.R <- Almost.Optimal(
+  Covariates = c("birth.weight", "Strata", "gestational.age"),
+  Pheno.Dataset = Pheno.Sort,
+  Randomization.Dataset = Rand.Space.Output.R
+)
 ```
 
 Again, we evaluate the balance in the covariates.
 
 ```{r 8.b, echo=TRUE}
-#Almost Optimal Allocation - randomization
-table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Av, data=Pheno.Final.Out.R)
+# Almost Optimal Allocation - randomization
+table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Av, data = Pheno.Final.Out.R)
 ```
 
 Comparison with the “Imbalance.N” allocation, demonstrates poor balance in all covariates, including the "neonate.gender" variable.
 
 ```{r 8.c, echo=TRUE}
-#Less than Optimal Allocation - randomization
-table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Imbalance.Av, data=Pheno.Final.Out.R)
+# Less than Optimal Allocation - randomization
+table1(~ factor(neonate.gender) + birth.weight + gestational.age | Batch.Assignment.Imbalance.Av, data = Pheno.Final.Out.R)
 ```
 
 ## 9. Limitations and Word of Caution
