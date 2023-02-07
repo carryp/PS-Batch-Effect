@@ -1,9 +1,11 @@
 --- 
 title: "Optimizing Sample Allocation: Introducing the SR.Allocation, R.Allocation, and Almost.Optimal Sample Selection Functions"
 author: "Patrick M. Carry, Tim Vigers, Lauren A. Vanderlinden, Carson Keeter, Fran Dong, Teresa Buckner, Elizabeth Litkowski, Ivana Yang, Jill M. Norris, Katerina Kechris"
+date: "Report generated: `r paste(format(Sys.Date(), '%B %d, %Y'))`"
 output: 
   html_document:
     toc: true
+    toc_float: true
     toc_depth: 5
 ---
 
